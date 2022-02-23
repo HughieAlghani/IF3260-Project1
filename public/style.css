@@ -1,0 +1,22 @@
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+.container{
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+}
+
+canvas {
+  height: 100vh;
+  width: 100vw;
+  background-color: #ffffff;
+}
+
+.input-box{
+  position: absolute;
+  top: 15px;
+  right: 20px;
+}

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimal-ui" />    
+    <link rel="stylesheet" href="style.css">
+    <title>WebGL Exploration</title>
+    <script src="main.js" defer></script>
+</head>
+<body>
+    <div class = 'container'>
+        <div class ='input-box'>
+            <input type="text" id="R" name="R" value="0">
+            <input type="text" id="G" name="G" value="0">
+            <input type="text" id="B" name="B" value="0">
+            <form class='input-shape'>
+                <input type="radio" id="line" name="tool" value="L">
+                <label for="line">Line</label>
+                <input type="radio" id="rectangle" name="tool" value="R">
+                <label for="rectangle">Rectangle</label>
+                <input type="radio" id="square" name="tool" value="S">
+                <label for="square">Square</label>
+                <input type="radio" id="polygon" name="tool" value="P">
+                <label for="polygon">Polygon</label>
+            </form>    
+        </div>
+    
+        <!-- <div class="slidecontainer">
+            <input type="range" min="0" max="10" value="1" class="slider" id="lineLengthSlider">
+          </div> -->
+        <canvas id="c"></canvas>
+
+    </div>
+    <!-- vertex shader -->
+    <script  id="vertex-shader-2d" type="x-shader/x-vertex">
+        attribute vec2 a_position;
+    
+        uniform mat3 u_matrix;
+    
+        void main() {
+            // Multiply the position by the matrix.
+            gl_Position = vec4((u_matrix * vec3(a_position, 1)).xy, 0, 1);
+        }
+    </script>
+    
+    <!-- fragment shader -->
+    <script  id="fragment-shader-2d" type="x-shader/x-fragment">
+        precision mediump float;
+        
+        uniform vec4 u_color;
+        
+        void main() {
+           gl_FragColor = u_color;
+        }
+    </script>    
+    
+    <script src="./modules/webgl-utils.js"></script>
+    <script src="./modules/webgl-lessons-ui.js"></script>
+    <script src="./modules/glUtils.js"></script>
+
+
+</body>
+</html>
