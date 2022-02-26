@@ -1,5 +1,11 @@
 "use strict";
 
+var type = {
+  NULL : -1,
+  LINE : 0,
+  RECTANGLE : 1,
+  POLYGON : 2
+}
 
 window.addEventListener("load", () => {
   // Get A WebGL context
@@ -11,41 +17,41 @@ window.addEventListener("load", () => {
     return;
   }
 
-  var drawingLine = false
-  let selectedLineId = -1;
-  let adjustingLineLength = false;
+  var lineData = {
+    coordinates: [], 
+    colors: [],
+  }
+
+  var selectedObject = {objectType: type.NULL};
+  var moveCoordinates = false;
+  var rectCoordinates = [];
   let n_line = 0;
-  var lineCoordinates = [];
   var startAt;
-  var selectedLineColor = []
 
   var r1 = 1,g1 = 0,b1 = 0;
 
-   
-  var lineColorArray = [] 
 
   function startDrawingLine(e){
     var point = pointer(e);
-    if (selectedLineId != -1){
-      adjustingLineLength = true;
+    if (selectedObject.objectType == type.LINE){
+      moveCoordinates = true;
       startAt = [point.x,point.y]
     } else{
-      drawingLine = true;
-      lineCoordinates.push(point.x,point.y);  
+      lineData.coordinates.push(point.x,point.y);  
     }
   }
 
   function stopDrawingLine(e){
     var point = pointer(e);
     // Penanganan jika hanya mengklik sekali / membuat sebuah point saja
-    if (point.x == lineCoordinates[lineCoordinates.length-2] && point.y == lineCoordinates[lineCoordinates.length-1]){
-      lineCoordinates.pop();
-      lineCoordinates.pop();
-
-      selectedLineId = lineCoordinates.findIndex(function (element, index, array){
+    if (point.x == lineData.coordinates[lineData.coordinates.length-2] && point.y == lineData.coordinates[lineData.coordinates.length-1]){
+      lineData.coordinates.pop();
+      lineData.coordinates.pop();
+      
+      let selectedLineId = lineData.coordinates.findIndex(function (element, index, array){
         if (index % 4 == 0){
           // check x0 value
-          if (pointToLineDistance(point.x,point.y,element,array[index+1],array[index+2],array[index+3]) < 10){
+          if (pointToLineDistance(point.x,point.y,element,array[index+1],array[index+2],array[index+3]) < 3){
             return true;
           }
         }
@@ -57,34 +63,36 @@ window.addEventListener("load", () => {
       return;
     }
 
-    if (adjustingLineLength){
-      let distanceFromVertex1 = pointToPointDistance(startAt[0],startAt[1],lineCoordinates[selectedLineId],lineCoordinates[selectedLineId+1])
-      let distanceFromVertex2 = pointToPointDistance(startAt[0],startAt[1],lineCoordinates[selectedLineId+2],lineCoordinates[selectedLineId+3])
+    if (moveCoordinates){
+      let distanceFromVertex1 = pointToPointDistance(startAt[0],startAt[1],lineData.coordinates[selectedObject.offset],lineData.coordinates[selectedObject.offset+1])
+      let distanceFromVertex2 = pointToPointDistance(startAt[0],startAt[1],lineData.coordinates[selectedObject.offset+2],lineData.coordinates[selectedObject.offset+3])
 
-      if (pointToLineDistance(startAt[0],startAt[1],lineCoordinates[selectedLineId],lineCoordinates[selectedLineId+1],lineCoordinates[selectedLineId+2],lineCoordinates[selectedLineId+3]) > 10){
+      if (pointToLineDistance(startAt[0],startAt[1],lineData.coordinates[selectedObject.offset],lineData.coordinates[selectedObject.offset+1],lineData.coordinates[selectedObject.offset+2],lineData.coordinates[selectedObject.offset+3]) > 5){
         unselectLine();
         return;
       }
 
       if (distanceFromVertex1 < distanceFromVertex2){
         // geser titik awal garis
-        lineCoordinates[selectedLineId] = point.x;
-        lineCoordinates[selectedLineId+1] = point.y;  
+        lineData.coordinates[selectedObject.offset] = point.x;
+        lineData.coordinates[selectedObject.offset+1] = point.y; 
       } else{
         // geser titik akhir garis
-        lineCoordinates[selectedLineId+2] = point.x;
-        lineCoordinates[selectedLineId+3] = point.y;  
+        lineData.coordinates[selectedObject.offset+2] = point.x;
+        lineData.coordinates[selectedObject.offset+3] = point.y;  
       }
+      // update original coordinates
+      selectedObject.original_coordinates = lineData.coordinates.slice(selectedObject.offset,selectedObject.offset+4)
 
       // gambar ulang garis pada koordinat baru
-      drawLine(gl, lineCoordinates, lineColorArray); 
+      drawLine(gl); 
 
     } else{
       n_line +=1
-      lineCoordinates.push(point.x,point.y);
-      lineColorArray.push(0,0,0,1,0,0,0,1);
-      drawLine(gl, lineCoordinates, lineColorArray); 
-      drawingLine = false; 
+      lineData.coordinates.push(point.x,point.y);
+      lineData.colors.push(document.getElementById("R").value / 255, document.getElementById("G").value / 255, document.getElementById("B").value / 255, 1);
+      lineData.colors.push(document.getElementById("R").value / 255, document.getElementById("G").value / 255, document.getElementById("B").value / 255, 1);
+      drawLine(gl); 
     }
   }
 
@@ -150,17 +158,41 @@ window.addEventListener("load", () => {
     }
   });
 
-  function updateColor() {
-    color = [document.getElementById("R").value / 255, document.getElementById("G").value / 255, document.getElementById("B").value / 255, 1];
-  }
 
-  function drawLine(gl,coordinates, colorArray) {
+    // add lineLenghtSlider event handler
+  var lineLengthSlider = document.querySelector("#lineLengthSlider");
+  lineLengthSlider.addEventListener("change", function (e){
+      if (selectedObject.objectType == type.LINE){
+        let start_center = {
+          x : (selectedObject.original_coordinates[0]+selectedObject.original_coordinates[2])/2,
+          y : (selectedObject.original_coordinates[1]+selectedObject.original_coordinates[3])/2
+        }
+        let end_center = {
+          x : (selectedObject.original_coordinates[0]*lineLengthSlider.value + selectedObject.original_coordinates[2]*lineLengthSlider.value)/2,
+          y : (selectedObject.original_coordinates[1]*lineLengthSlider.value + selectedObject.original_coordinates[3]*lineLengthSlider.value)/2
+        }
+        let translate = [end_center.x-start_center.x,end_center.y-start_center.y]
+    
+        for (let i = 0; i < 4; i++){
+          lineData.coordinates[selectedObject.offset+i] = selectedObject.original_coordinates[i] * lineLengthSlider.value
+          if (i%2 == 0){
+            lineData.coordinates[selectedObject.offset+i] -= translate[0];
+          } else{
+            lineData.coordinates[selectedObject.offset+i] -= translate[1];
+          }
+        }
+        drawLine(gl)
+      }
+  })
+  
+
+  function drawLine(gl) {
     // setup GLSL program
     var program = webglUtils.createProgramFromScripts(gl, ["vertex-shader-2d", "fragment-shader-2d"]);
     
     // look up where the vertex data needs to go.
     var positionAttributeLocation = gl.getAttribLocation(program, "a_position");
-    var colorLocation = gl.getUniformLocation(program, "u_color");
+    var colorLocation = gl.getAttribLocation(program, "a_color");
 
     // lookup uniforms
     var matrixLocation = gl.getUniformLocation(program, "u_matrix");
@@ -171,23 +203,18 @@ window.addEventListener("load", () => {
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
       
     // Set Geometry.
-    setGeometry(gl, coordinates);
+    setGeometry(gl, lineData.coordinates);
 
     // Create a buffer for the colors.
-    // var colorBuffer = gl.createBuffer();
-    // gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-    // setColors(gl, color);
+    var colorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    setColors(gl, lineData.colors);
   
     var translation = [0, 0];
     var angleInRadians = 0;
     var scale = [1,1];
   
     drawScene();
-
-    // Draw the scene.
-    function updateColor() {
-      color = [document.getElementById("R").value / 255, document.getElementById("G").value / 255, document.getElementById("B").value / 255, 1];
-    }
 
     function drawScene() {
       webglUtils.resizeCanvasToDisplaySize(gl.canvas);
@@ -207,8 +234,8 @@ window.addEventListener("load", () => {
       // Bind the position buffer.
       gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
-      console.log(lineCoordinates)
-      console.log(colorArray)  
+      console.log(lineData.coordinates)
+      console.log(lineData.colors)  
 
       // Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
       var size = 2;          // 2 components per iteration
@@ -223,21 +250,16 @@ window.addEventListener("load", () => {
       gl.enableVertexAttribArray(colorLocation);
   
       // Bind the color buffer.
-      // gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+      gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
   
       // Tell the color attribute how to get data out of colorBuffer (ARRAY_BUFFER)
-      // var size = 4;          // 4 components per iteration
-      // var type = gl.FLOAT;   // the data is 32bit floats
-      // var normalize = false; // don't normalize the data
-      // var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
-      // var offset = 0;        // start at the beginning of the buffer
-      // gl.vertexAttribPointer(
-      //     colorLocation, size, type, normalize, stride, offset);
-
-      // set the color
-      updateColor();
-      gl.uniform4fv(colorLocation, color);
-      
+      var size = 4;          // 4 components per iteration
+      var type = gl.FLOAT;   // the data is 32bit floats
+      var normalize = false; // don't normalize the data
+      var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+      var offset = 0;        // start at the beginning of the buffer
+      gl.vertexAttribPointer(
+          colorLocation, size, type, normalize, stride, offset);
   
       // Compute the matrix
       var matrix = m3.projection(gl.canvas.clientWidth, gl.canvas.clientHeight);
@@ -365,34 +387,37 @@ window.addEventListener("load", () => {
   }  
 
   function selectLine(selectedLineId){
+    lineLengthSlider.value = 1;
     // set red the selected line
-    selectedLineColor = []
+    selectedObject.objectType = type.LINE;
+    selectedObject.offset  = selectedLineId;
+    // save original color and coordinates
+    selectedObject.original_color = lineData.colors.slice(selectedLineId*2,selectedLineId*2+8)
+    selectedObject.original_coordinates = lineData.coordinates.slice(selectedLineId,selectedLineId+4)
     for (let i = selectedLineId*2;i < selectedLineId*2+8;i+=4){
-      selectedLineColor.push(lineColorArray[i]);selectedLineColor.push(lineColorArray[i+1]);
-      selectedLineColor.push(lineColorArray[i+2]);
-      lineColorArray[i]=r1
-      lineColorArray[i+1]=g1
-      lineColorArray[i+2] = b1
-      lineColorArray[i+3]=1
+      // set selected line red
+      lineData.colors[i]=r1
+      lineData.colors[i+1]=g1
+      lineData.colors[i+2] = b1
+      lineData.colors[i+3]=1
     }
-    drawLine(gl, lineCoordinates, lineColorArray); 
+    drawLine(gl); 
   }
 
   function unselectLine(){
     // unselect currently selected line
     
-    if (selectedLineId != -1){
-      // set black the selected line
-      for (let i = selectedLineId*2;i < selectedLineId*2+8;i+=4){
-        lineColorArray[i]=selectedLineColor[0]
-        lineColorArray[i+1]=selectedLineColor[1]
-        lineColorArray[i+2] = selectedLineColor[2]
-        lineColorArray[i+3]=1
-      }  
-      selectedLineId = -1;
-      selectedLineColor = []
-      adjustingLineLength = false;
-      drawLine(gl, lineCoordinates, lineColorArray); 
+    if (selectedObject.objectType == type.LINE){
+      // set the selected line to original color
+      for (let i = selectedObject.offset*2;i < selectedObject.offset*2+8;i+=4){
+        lineData.colors[i]= selectedObject.original_color[0]
+        lineData.colors[i+1]= selectedObject.original_color[1]
+        lineData.colors[i+2] = selectedObject.original_color[2]
+        lineData.colors[i+3]= selectedObject.original_color[3]
+      }        
+      selectedObject = {objectType: type.NULL};
+      moveCoordinates = false;
+      drawLine(gl); 
     }
   }
 
@@ -516,5 +541,20 @@ window.addEventListener("load", () => {
     var rect = canvas.getBoundingClientRect();
     return { x : event.clientX - rect.left, y : event.clientY - rect.top};
   };
+
+  function searchPointInRect(x1, y1){
+    for (let i = 0; i < (rectCoordinates.length)-1; i+=2){
+      if (pointToPointDistance(x1,y1,rectCoordinates[i],rectCoordinates[i+1]) < 1){
+           selectedObject.objectType = type.RECTANGLE;
+           selectedObject.offset = Math.floor(i / 12);
+
+          //  {type : 1, 
+          //   object_order_number : Math.floor(i / 12),
+          //   vertex_id : i}
+      }
+    }
+  }
+
+  
 
 })

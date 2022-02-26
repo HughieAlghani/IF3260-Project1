@@ -6,17 +6,23 @@ html, body {
 .container{
   width: 100vw;
   height: 100vh;
-  position: relative;
+  display: flex;
 }
 
 canvas {
   height: 100vh;
-  width: 100vw;
+  width: 80%;
   background-color: #ffffff;
 }
 
 .input-box{
-  position: absolute;
-  top: 15px;
-  right: 20px;
+  padding: 10px;
+  background-color: #000000;
+  color: #ffffff;
 }
+
+.input-shape{
+
+}
+
+.sl
