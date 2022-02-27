@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimal-ui" />    
+    <link rel="stylesheet" href="style.css">
+    <title>WebGL Exploration</title>
+    <script src="main.js" defer></script>
+</head>
+<body>
+    <div class = 'container'>
+        <div class ='input-box'>
+            <h3>Color </h3>
+            <div class='input-color'>
+                <label for="R">R</label>
+                <input type="text" id="R" name="R" value="0">
+            </div>
+            <div class='input-color'>
+                <label for="G">G</label>
+                <input type="text" id="G" name="G" value="0">
+            </div>
+            <div class='input-color'>
+                <label for="B">B</label>
+                <input type="text" id="B" name="B" value="0">
+            </div>
+
+            <h3>Shape </h3>
+            <form class='input-shape'>
+                <div class='input-shape-tool'>
+                    <input type="radio" id="line" name="tool" value="L">
+                    <label for="line">Line</label>    
+                </div>
+                <div class='input-shape-tool'>
+                    <input type="radio" id="rectangle" name="tool" value="R">
+                    <label for="rectangle">Rectangle</label>
+                </div>
+                <div class='input-shape-tool'>
+                    <input type="radio" id="square" name="tool" value="S">
+                    <label for="square">Square</label>    
+                </div>
+                <div class='input-shape-tool'>
+                    <input type="radio" id="polygon" name="tool" value="P">
+                    <label for="polygon">Polygon</label>    
+                </div>     
+            </form>
+            <button id="Start"> Start </button>
+            <button id="Done"> Done </button>
+
+            <h3>Slider </h3>
+            <div class="slidecontainer">
+                <label for="lineLengthSlider">Scaling Line Length</label>
+                <input type="range" min="0" max="10" value="1" step="0.001" class="slider" id="lineLengthSlider">
+              </div>        
+        </div>
+    
+        <canvas id="c"></canvas>
+
+    </div>
+    <!-- vertex shader -->
+    <script  id="vertex-shader-2d" type="x-shader/x-vertex">
+        attribute vec2 a_position;
+        attribute vec4 a_color;
+    
+        uniform mat3 u_matrix;
+
+        varying vec4 v_color;
+    
+        void main() {
+            // Multiply the position by the matrix.
+            gl_Position = vec4((u_matrix * vec3(a_position, 1)).xy, 0, 1);
+            v_color = a_color;
+        }
+    </script>
+    
+    <!-- fragment shader -->
+    <script  id="fragment-shader-2d" type="x-shader/x-fragment">
+        precision mediump float;
+        
+        varying vec4 v_color;
+        
+        void main() {
+           gl_FragColor = v_color;
+        }
+    </script>    
+    
+    <script src="./modules/webgl-utils.js"></script>
+    <script src="./modules/webgl-lessons-ui.js"></script>
+    <script src="./modules/glUtils.js"></script>
+
+
+</body>
+</html>
