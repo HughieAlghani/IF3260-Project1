@@ -38,7 +38,7 @@
       });
     } else {
       // Browser globals
-      root.webglLessonsUI = factory.call(root);
+      root.input = factory.call(root);
     }
   }(this, function() {
     'use strict';
