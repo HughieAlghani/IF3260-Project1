@@ -11,6 +11,14 @@
 <body>
     <div class = 'container'>
         <div class ='input-box'>
+            <h3>Input File</h3>
+            <div class='input-file'>
+                <label for="input_file_name">File name (e.g : input.txt)</label>
+                <input type="text" id="input_file_name" name="input_file_name" value="tes.txt">
+                <button id="import">Import</button>
+            </div>
+
+
             <h3>Color </h3>
             <div class='input-color'>
                 <label for="R">R</label>
@@ -28,7 +36,7 @@
             <h3>Shape </h3>
             <form class='input-shape'>
                 <div class='input-shape-tool'>
-                    <input type="radio" id="line" name="tool" value="L">
+                    <input type="radio" id="line" name="tool" value="L" checked="true">
                     <label for="line">Line</label>    
                 </div>
                 <div class='input-shape-tool'>
@@ -36,27 +44,91 @@
                     <label for="rectangle">Rectangle</label>
                 </div>
                 <div class='input-shape-tool'>
-                    <input type="radio" id="square" name="tool" value="S">
-                    <label for="square">Square</label>    
-                </div>
-                <div class='input-shape-tool'>
                     <input type="radio" id="polygon" name="tool" value="P">
-                    <label for="polygon">Polygon</label>    
+                    <label for="polygon">Polygon</label>
                 </div>
             </form>
 
-            <h3>Slider </h3>
-            <div class="slidecontainer">
-                <label for="lineLengthSlider">Scaling Line Length</label>
-                <input type="range" min="0" max="10" value="1" step="0.01" class="slider" id="lineLengthSlider">
+            <div id="line-tools">
+                <h3> Scaling Line </h3>
+                <div class="slidecontainer">
+                    <label for="lineLengthSlider">Scaling Line Length</label>
+                    <input type="range" min="0" max="10" value="1" step="0.01" class="slider" id="lineLengthSlider">
+                    </div>
             </div>
-            
-            <button id="save">Save</button>
-        </div>
-    
-        <canvas id="c"></canvas>
 
+            <div id="poly-tools">
+                <h3> Draw Polygon </h3>
+                <div class="draw-polygon">
+                    <button id="Start"> Start </button>
+                    <button id="Done"> Done </button>
+                </div>
+            </div>
+                        
+            <button id="save">Save</button>
+            <button id="help">Help</button>
+
+            <div id="help-text">
+                <button id="garis"> 1. Garis </button>
+                <div id="help-garis">
+                    <button id="gambar-garis"> 1. Menggambar garis </button>
+                    <div class="gambar-garis">
+                        <p> - Pilih opsi 'Line' <br> - Isi nilai warna RGB <br> - Drag pada canvas <p>
+                    </div>
+                    <button id="panjang-garis"> 2. Mengubah panjang garis </button>
+                    <div class="panjang-garis">
+                        <p> - Opsi 'Line' terpilih <br> - Klik vertex pada objek garis <br> - Drag vertex ke posisi baru <p>
+                    </div>
+                </div>
+                <button id="persegi-panjang"> 2. Persegi Panjang </button>
+                <div id="help-ppanjang">
+                    <button id="gambar-ppanjang"> 1. Menggambar persegi panjang </button>
+                    <div class="gambar-ppanjang">
+                        <p> - Pilih opsi 'Rectangle' <br> - Isi nilai warna RGB <br> - Drag pada canvas <p>
+                    </div>
+                    <button id="panjang-ppanjang"> 2. Mengubah panjang sisi persegi panjang </button>
+                    <div class="panjang-ppanjang">
+                        <p> - Opsi 'Rectangle' terpilih <br> - Klik vertex pada objek segiempat <br> - Drag vertex ke posisi baru <p>
+                    </div>
+                </div>
+                <button id="persegi"> 3. Persegi </button>
+                <div id="help-persegi">
+                    <button id="gambar-persegi"> 1. Menggambar persegi </button>
+                    <div class="gambar-persegi">
+                        <p> - Pilih opsi 'Rectangle' <br> - Isi nilai warna RGB <br> - Drag pada canvas sambil menekan tombol Ctrl <p>
+                    </div>
+                    <button id="panjang-persegi"> 2. Mengubah panjang sisi persegi </button>
+                    <div class="panjang-persegi">
+                        <p> - Opsi 'Rectangle' terpilih <br> - Klik vertex pada objek segiempat <br> - Drag vertex ke posisi baru <p>
+                    </div>
+                </div>
+                <button id="poligon"> 4. Poligon </button>
+                <div id="help-poligon">
+                    <button id="gambar-poligon"> 1. Menggambar poligon </button>
+                    <div class="gambar-poligon">
+                        <p> - Pilih opsi 'Polygon' <br> - Isi nilai warna RGB <br> - Tekan 'Start' dan klik beberapa titik pada canvas <br> - Tekan 'Done' <p>
+                    </div>
+                    <button id="lokasi-titik-poligon"> 2. Mengubah lokasi titik poligon </button>
+                    <div class="lokasi-titik-poligon">
+                        <p> - Opsi 'Polygon' terpilih <br> - Klik vertex pada objek poligon <br> - Drag vertex ke posisi baru <p>
+                    </div>
+                </div>
+                <button id="import-export"> 5. Save and Load </button>
+                <div id="help-import-export">
+                    <button id="import"> 1. Load File </button>
+                    <div class="import">
+                        <p> - Ketik nama file yang ingin diimport atau digunakan untuk melakukan save <br> - Klik 'Import' untuk melakukan import file <p>
+                    </div>
+                    <button id="export"> 2. Save file </button>
+                    <div class="export">
+                        <p> - Klik 'Save' untuk menyimpan data koordinat dan warna gambar <br> - Data akan tersimpan pada file yang digunakan pada import <p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <canvas id="c"></canvas>
     </div>
+ 
     <!-- vertex shader -->
     <script  id="vertex-shader-2d" type="x-shader/x-vertex">
         attribute vec2 a_position;
@@ -82,10 +154,12 @@
         void main() {
            gl_FragColor = v_color;
         }
+    </script>
     </script>    
     
     <script src="./modules/webgl-utils.js"></script>
-    <script src="./modules/webgl-lessons-ui.js"></script>
+    <script src="./modules/webgl-lessons-u"></script></body>
+</html>
 
 
 </body>

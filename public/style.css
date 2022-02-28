@@ -16,7 +16,77 @@ canvas {
 }
 
 .input-box{
+  width: 20%;
   padding: 10px;
   background-color: #000000;
   color: #ffffff;
+}
+
+#save{
+  margin-top: 35px;
+}
+
+#import{
+  padding: 5px 10px;
+  margin-top: 5px;
+}
+
+button{
+  cursor: pointer;
+  border-radius: 10px;
+  padding: 8px 20px;
+
+}
+
+button::hover{
+  background-color: cornflowerblue;
+  color: #ffffff;
+}
+
+#help-text {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+#help-text button, input[type="submit"], input[type="reset"] {
+	background: none;
+	color: inherit;
+	border: none;
+	padding: 0;
+	font: inherit;
+	cursor: pointer;
+	outline: inherit;
+}
+
+#help-text p{
+  margin: 2px 0px 2px 20px;
+  display: flex;
+
+}
+
+#help-garis {
+  margin-left: 20px;
+  display: none;
+}
+
+#help-ppanjang {
+  margin-left: 20px;
+  display: none;
+}
+
+#help-persegi {
+  margin-left: 20px;
+  display: none;
+}
+
+#help-poligon {
+  margin-left: 20px;
+  display: none;
+}
+
+#help-import-export {
+  margin-left: 20px;
+  display: none;
 }
